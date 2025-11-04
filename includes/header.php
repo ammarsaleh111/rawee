@@ -98,7 +98,7 @@ $lang_switch_url = $current_script . '?' . http_build_query($new_query);
             <?php if ($cartItemCount > 0): ?>
                 <span class="cart-item-count"><?php echo $cartItemCount; ?></span>
             <?php endif; ?>
-        </a>
+            </a>
     </div>
 <script>
   // Mobile menu toggle
