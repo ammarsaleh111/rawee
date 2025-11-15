@@ -94,259 +94,336 @@ body {
   margin: 0 auto;
 }
 
-/* ======================= FINAL, PERFECTED HEADER STYLES ======================= */
-
-/* --- Main Header Bar --- */
+/* ======================= RESPONSIVE HEADER (GRID + FLEX REBUILD) ======================= */
 .main-header {
+  padding: 5px 0;
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 999;
-  padding: 1rem 0;
-  transition: background-color 0.4s ease, backdrop-filter 0.4s ease,
-    box-shadow 0.4s ease, padding 0.4s ease;
+  z-index: 1000;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease, background 0.3s ease;
 }
-
-/* --- Scrolled State (Applied with JavaScript) --- */
 .main-header.scrolled {
-  background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  padding: 0.75rem 0;
 }
-
-.main-header .container {
-  display: flex;
-  justify-content: space-between;
+.header-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  padding: 0 40px; /* Side padding for the container */
+  gap: 5rem 2rem;
+  padding: 0 2rem;
 }
-
-/* --- Logo --- */
+@media (max-width: 992px) {
+  .header-grid {
+    grid-template-columns: auto auto;
+  }
+}
 .logo {
   font-size: 2rem;
   font-weight: 700;
   color: var(--penn-blue);
   text-decoration: none;
-  transition: color 0.3s ease;
+  letter-spacing: 0.5px;
+}
+.logo:hover {
+  color: var(--teal);
 }
 
-/* --- Navigation --- */
-.main-nav {
-  flex-grow: 1;
-  text-align: center;
+/* Navigation */
+.primary-nav {
+  position: relative;
+  justify-self: center;
 }
-
-.main-nav ul {
+.nav-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: inline-flex;
+  display: flex;
+  gap: 2.2rem;
+  justify-content: center;
 }
-
-.main-nav ul li {
-  margin: 0 20px;
+.mobile-auth-block,
+.nav-close {
+  display: none;
 }
-
-.main-nav ul li a {
+.nav-list a {
   text-decoration: none;
-  color: var(--rich-black);
   font-weight: 600;
+  color: var(--rich-black);
   position: relative;
-  padding-bottom: 5px;
-  transition: color 0.3s ease;
+  padding: 0.4rem 0;
 }
-
-.main-nav ul li a::after {
+.nav-list a::after {
   content: "";
   position: absolute;
-  bottom: 0;
   left: 0;
+  bottom: 0;
   width: 0;
   height: 2px;
-  background-color: var(--teal);
-  transition: width 0.4s ease;
+  background: var(--teal);
+  transition: width 0.35s ease;
 }
-
-.main-nav ul li a:hover {
-  color: var(--teal);
-}
-
-.main-nav ul li a:hover::after {
+.nav-list a:hover::after,
+.nav-list a:focus::after {
   width: 100%;
 }
 
-/* --- Header Buttons --- */
-.header-actions {
+/* Right cluster */
+.header-right {
   display: flex;
-  gap: 15px;
+  align-items: center;
+  gap: 1.2rem;
+  justify-self: end;
+  flex-wrap: nowrap;
+  min-width: fit-content;
 }
-
-.header-actions .btn {
-  padding: 10px 22px;
-  text-decoration: none;
-  border-radius: 5px;
+.desktop-auth-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+.desktop-auth-buttons .btn {
+  padding: 0.55rem 1.2rem;
   font-weight: 600;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
+  border: 2px solid var(--teal);
+  border-radius: var(--radius-md);
+  transition: 0.3s;
 }
-
-.header-actions .btn-primary {
-  background-color: var(--teal);
+.desktop-auth-buttons .btn.btn-primary {
+  background: var(--teal);
   color: #fff;
-  border-color: var(--teal);
 }
-
-.header-actions .btn-primary:hover {
-  background-color: var(--blue-munsell);
-  border-color: var(--blue-munsell);
-  transform: translateY(-2px);
-}
-
-.header-actions .btn-secondary {
-  background-color: transparent;
+.desktop-auth-buttons .btn.btn-secondary {
+  background: transparent;
   color: var(--teal);
-  border-color: var(--teal);
 }
-
-.header-actions .btn-secondary:hover {
-  background-color: var(--teal);
-  color: #fff;
+.desktop-auth-buttons .btn:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.desktop-auth-buttons .btn.btn-secondary:hover {
+  background: var(--teal);
+  color: #fff;
 }
 
-/* --- Mobile Menu Toggle ("Hamburger") --- */
-.mobile-toggle {
-  display: none; /* Hidden on desktop */
-  flex-direction: column;
-  justify-content: space-around;
-  width: 30px;
-  height: 24px;
-  cursor: pointer;
-  z-index: 1002;
-}
-
-/* Header icon group (outside the main container) - pins icons to the very edge */
-.header-icon-group {
-  position: fixed;
-  top: 14px; /* same vertical alignment as header */
-  right: 8px; /* place at the very right edge */
+/* Utility icons */
+.utility-icons {
   display: flex;
-  gap: 10px;
-  z-index: 1200;
+  align-items: space-around;
+  gap: -5px;
 }
-
-/* For Arabic, pin to the left edge */
-html[dir="rtl"] .header-icon-group {
-  left: 8px;
-  right: auto;
-  flex-direction: row-reverse; /* make cart appear before globe visually */
-}
-
-/* Make globe use regular (outlined) look and color match cart */
 .icon-btn {
   background: transparent;
   border: none;
-  padding: 0 10px;
-  cursor: pointer;
-  color: var(--dark-primary);
-  font-size: 1.5rem; /* match cart icon size */
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  font-size: 1.35rem;
+  color: var(--rich-black);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-md);
+  transition: 0.25s;
 }
-.icon-btn i {
-  color: inherit;
+.icon-btn:hover,
+.icon-btn:focus {
+  color: var(--teal);
+  transition: color 0.25s;
 }
-.icon-btn:hover {
-  color: var(--primary-color);
+.header-cart-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: var(--rich-black);
+  text-decoration: none;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-md);
+  transition: 0.25s;
+}
+.header-cart-icon:hover {
+  color: var(--teal);
+  transition: color 0.25s;
+}
+.cart-item-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(35%, -35%);
+  background: var(--teal);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px #fff;
+}
+html[dir="rtl"] .cart-item-count {
+  right: auto;
+  left: 0;
 }
 
-.mobile-toggle span {
-  width: 100%;
+/* Profile dropdown retains previous styling */
+.header-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.profile-greeting {
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+}
+@media (max-width: 576px) {
+  .profile-greeting {
+    display: none;
+  }
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  width: 34px;
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  cursor: pointer;
+  gap: 5px;
+}
+.hamburger span {
+  display: block;
   height: 3px;
+  width: 100%;
   background: var(--rich-black);
   border-radius: 2px;
-  transition: all 0.3s ease;
+  transition: 0.4s;
 }
-.auth-modal .btn-submit:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(7, 122, 125, 0.25);
+.hamburger.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
 }
-.mobile-close {
-  display: none; /* Hidden by default, shown in mobile nav */
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
 }
-@media (max-width: 992px) {
-  .main-nav {
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+@media (max-width: 1080px) {
+  .hamburger {
+    display: flex;
+  }
+}
+
+/* Off-canvas nav (mobile/tablet) */
+@media (max-width: 1080px) {
+  .primary-nav {
     position: fixed;
     top: 0;
-    z-index: 9999;
     right: -100%;
-    width: 60%;
-    max-width: 300px;
-    height: 100vh;
+    bottom: 0;
+    width: min(320px, 82%);
     background: #fff;
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    box-shadow: -6px 0 18px rgba(0, 0, 0, 0.15);
+    padding: 4.5rem 2rem 2rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    flex-direction: column;
+    gap: 2.5rem;
+    transition: right 0.45s cubic-bezier(0.4, 0.14, 0.3, 1);
+    z-index: 1100;
   }
-
-  /* mobile close button */
-  .main-nav .mobile-close {
+  html[dir="rtl"] .primary-nav {
+    right: auto;
+    left: -100%;
+    box-shadow: 6px 0 18px rgba(0, 0, 0, 0.15);
+  }
+  .primary-nav.open {
+    right: 0;
+  }
+  html[dir="rtl"] .primary-nav.open {
+    left: 0;
+  }
+  .nav-list {
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+  .nav-close {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: 1rem;
+    right: 1rem;
     background: transparent;
     border: none;
     font-size: 2rem;
     line-height: 1;
-    color: var(--rich-black);
     cursor: pointer;
-    z-index: 10010;
-    display: block;
-    padding: 6px;
-    border-radius: 6px;
-    transition: 0.15s ease-in-out, color 0.15s ease-in-out;
+    color: var(--rich-black);
   }
-  .main-nav .mobile-close:hover {
-    background: rgba(7, 122, 125, 0.08);
+  html[dir="rtl"] .nav-close {
+    right: auto;
+    left: 1rem;
   }
-
-  .main-nav.active {
-    right: 0;
-    display: flex !important;
-  }
-
-  .main-nav ul {
-    flex-direction: column;
-    gap: 30px;
-  }
-
-  .main-nav ul li a {
-    font-size: 1.2rem;
-  }
-
-  .mobile-toggle {
+  .mobile-auth-block {
+    margin-top: auto;
     display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
   }
-
-  .mobile-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(7px, 7px);
+  .mobile-auth-link,
+  .mobile-auth-btn {
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--rich-black);
   }
-  .mobile-toggle.active span:nth-child(2) {
-    opacity: 0;
+  .mobile-auth-link:hover {
+    color: var(--teal);
   }
-  .mobile-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
+  .desktop-auth-buttons {
+    display: none;
+  }
+  .header-grid {
+    grid-template-columns: auto 1fr;
   }
 }
 
+/* Overlay */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease;
+  z-index: 1050;
+}
+.nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+body.nav-open {
+  overflow: hidden;
+}
+
+/* RTL tweaks */
+html[dir="rtl"] .nav-list a::after {
+  left: auto;
+  right: 0;
+}
+html[dir="rtl"] .header-right {
+  flex-direction: row-reverse;
+}
+
+/* Utility responsive adjustments */
 @media (max-width: 576px) {
-  .header-actions {
-    display: none; /* Optionally hide buttons on very small screens */
+  .utility-icons {
+    margin-left: 0.25rem;
   }
 }
 
@@ -2629,4 +2706,223 @@ html[dir="rtl"] .lang-switcher .fa-globe {
     opacity: 1;
     transform: translateY(0);
   }
+}
+/*///////////////////////////////////////*/
+/* ==========================================================================
+   MOBILE SIDEBAR STYLES
+   ========================================================================== */
+
+/* 1. Base Sidebar and Overlay */
+.primary-nav {
+  /* Initial state: hidden off-screen */
+  position: fixed;
+  top: 0;
+  right: 0; /* Slide in from the right */
+  width: 80%; /* Max width for mobile */
+  max-width: 300px; /* Limit size on larger screens */
+  height: 100%;
+  background-color: white; /* Use a clean background */
+  z-index: 1000; /* Ensure it's above everything */
+  transform: translateX(100%); /* Start off-screen to the right */
+  transition: transform var(--transition-normal) ease-in-out,
+    box-shadow var(--transition-normal) ease-in-out;
+  padding: var(--spacing-2xl) var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-2xl); /* Initial shadow for depth */
+}
+
+.primary-nav.open {
+  transform: translateX(0); /* Slide into view */
+  /* Add a stronger shadow when open for better visual separation */
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Dark, semi-transparent backdrop */
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-normal) ease-in-out,
+    visibility var(--transition-normal) ease-in-out;
+  backdrop-filter: blur(3px); /* Subtle blur effect */
+}
+
+.nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 2. Close Button */
+.nav-close {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--dark-primary);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.nav-close:hover,
+.nav-close:focus {
+  color: var(--primary-color);
+  outline: none;
+}
+
+/* 3. Navigation Links (ul.nav-list) */
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-lg) 0 var(--spacing-2xl) 0; /* Add space above and below the main links */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm); /* Spacing between links */
+}
+
+.nav-list a {
+  display: block;
+  padding: var(--spacing-sm) 0;
+  color: var(--dark-primary);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.nav-list a:hover,
+.nav-list a:focus {
+  color: var(--primary-color);
+  padding-left: var(--spacing-sm); /* Subtle slide-in effect on hover */
+}
+
+/* 4. Mobile Auth Block (mobile-auth-block) */
+.mobile-auth-block {
+  margin-top: auto; /* Push to the bottom */
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--gray-300);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Style for Logged-in links */
+.mobile-auth-block a.mobile-auth-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  color: var(--dark-secondary);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color var(--transition-fast);
+}
+
+.mobile-auth-block a.mobile-auth-link i {
+  width: 1.25rem; /* Fixed width for icons */
+  text-align: center;
+  color: var(--primary-color);
+}
+
+.mobile-auth-block a.mobile-auth-link:hover {
+  color: var(--primary-dark);
+}
+
+/* 5. Guest Auth Buttons (authButtonsMobile) */
+#authButtonsMobile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+#authButtonsMobile .btn {
+  width: 100%;
+  text-align: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+#authButtonsMobile .btn-secondary {
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+#authButtonsMobile .btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+#authButtonsMobile .btn-primary {
+  background-color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+#authButtonsMobile .btn-primary:hover {
+  border-color: var(--primary-dark);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 6. Media Query for Mobile View */
+/* The sidebar should only be visible on mobile screens (max-width: 992px) */
+@media (min-width: 1080px) {
+  .primary-nav {
+    /* Reset for desktop: hide the mobile sidebar styles */
+    position: static;
+    width: auto;
+    max-width: none;
+    height: auto;
+    background-color: transparent;
+    transform: translateX(0);
+    box-shadow: none;
+    padding: 0;
+    display: block; /* Or whatever the desktop display is */
+  }
+
+  .nav-overlay {
+    display: none;
+  }
+
+  .nav-close {
+    display: none;
+  }
+
+  /* Ensure desktop nav list is horizontal */
+  .primary-nav .nav-list {
+    flex-direction: row;
+    margin: 0;
+    gap: var(--spacing-lg);
+  }
+
+  .primary-nav .nav-list a {
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  /* Hide mobile-specific blocks on desktop */
+  .mobile-auth-block {
+    display: none;
+  }
+}
+
+/* Accessibility: Prevent scroll on body when nav is open */
+.nav-open {
+  overflow: hidden;
 }

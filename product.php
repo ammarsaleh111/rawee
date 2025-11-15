@@ -8,6 +8,13 @@ $text = file_exists($lang_file) ? json_decode(file_get_contents($lang_file), tru
 
 // The page title uses the specific 'product_pageTitle' key.
 $pageTitle = $text['product_pageTitle'] ?? 'Our Products - RAWEE Smart Farm IoT Solutions';
+
+// Shared form handler path for contact form
+$basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
+  $basePath = '';
+}
+$sendMessageAction = $basePath . '/php/send_message.php';
 // ========================================================================================
 ?>
 <!DOCTYPE html>
@@ -308,14 +315,28 @@ echo '</div>';
                   <h3 class="form-title"><?php echo $text['product_form_title'] ?? 'Contact Our IoT Farm Specialists'; ?></h3>
                   <p class="form-subtitle"><?php echo $text['product_form_subtitle'] ?? 'Tell us about your farm needs...'; ?></p>
                 </div>
-                <form class="custom-form" id="contactForm" action="php/contact_handler.php" method="POST">
+                <?php if (isset($_GET['status'])):
+                  $isSuccess = $_GET['status'] === 'success';
+                  $statusMessage = $isSuccess
+                    ? ($text['product_form_success'] ?? 'Thanks! Our specialists will contact you soon.')
+                    : ($text['product_form_error'] ?? 'We could not submit your request. Please try again.');
+                ?>
+                  <div class="form-status" style="padding:12px 16px;margin-bottom:1.5rem;border-radius:10px;background:<?php echo $isSuccess ? '#e6f4ea' : '#fdeaea'; ?>;color:<?php echo $isSuccess ? '#0f5132' : '#842029'; ?>;font-weight:500;">
+                    <?php echo $statusMessage; ?>
+                  </div>
+                <?php endif; ?>
+                <form class="custom-form" id="contactForm" action="<?php echo $sendMessageAction; ?>" method="POST">
                   <div class="row g-3">
-                    <div class="col-md-6"><div class="form-floating"><input type="text" class="form-control" id="fullName" name="full_name" placeholder="Full Name" required /><label for="fullName"><i class="fas fa-user me-2"></i><?php echo $text['product_form_nameLabel'] ?? 'Full Name'; ?></label></div></div>
+                    <div class="col-md-6"><div class="form-floating"><input type="text" class="form-control" id="fullName" name="name" placeholder="Full Name" required /><label for="fullName"><i class="fas fa-user me-2"></i><?php echo $text['product_form_nameLabel'] ?? 'Full Name'; ?></label></div></div>
                     <div class="col-md-6"><div class="form-floating"><input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone / WhatsApp" required /><label for="phone"><i class="fas fa-phone me-2"></i><?php echo $text['product_form_phoneLabel'] ?? 'Phone / WhatsApp'; ?></label></div></div>
                     <div class="col-12"><div class="form-floating"><input type="email" class="form-control" id="email" name="email" placeholder="Email" /><label for="email"><i class="fas fa-envelope me-2"></i><?php echo $text['product_form_emailLabel'] ?? 'Email (optional)'; ?></label></div></div>
                     <div class="col-md-6"><div class="form-floating"><select class="form-select" id="farmSize" name="farm_size" required><option value=""><?php echo $text['product_form_farmSizeOption0'] ?? 'Select farm size'; ?></option><option value="small"><?php echo $text['product_form_farmSizeOption1'] ?? 'Small (1-10 acres)'; ?></option><option value="medium"><?php echo $text['product_form_farmSizeOption2'] ?? 'Medium (10-50 acres)'; ?></option><option value="large"><?php echo $text['product_form_farmSizeOption3'] ?? 'Large (50-200 acres)'; ?></option><option value="enterprise"><?php echo $text['product_form_farmSizeOption4'] ?? 'Enterprise (200+ acres)'; ?></option></select><label for="farmSize"><i class="fas fa-seedling me-2"></i><?php echo $text['product_form_farmSizeLabel'] ?? 'Farm Size'; ?></label></div></div>
                     <div class="col-md-6"><div class="form-floating"><select class="form-select" id="systemType" name="solution_type" required><option value=""><?php echo $text['product_form_solutionTypeOption0'] ?? 'Select solution type'; ?></option><option value="aquaculture"><?php echo $text['product_form_solutionTypeOption1'] ?? 'Aquaculture Monitoring'; ?></option><option value="hydroponics"><?php echo $text['product_form_solutionTypeOption2'] ?? 'Hydroponics Automation'; ?></option><option value="greenhouse"><?php echo $text['product_form_solutionTypeOption3'] ?? 'Greenhouse Climate Control'; ?></option><option value="field_crops"><?php echo $text['product_form_solutionTypeOption4'] ?? 'Field Crop Optimization'; ?></option><option value="other"><?php echo $text['product_form_solutionTypeOption5'] ?? 'Other IoT Solution'; ?></option></select><label for="systemType"><i class="fas fa-microchip me-2"></i><?php echo $text['product_form_solutionTypeLabel'] ?? 'Solution Type'; ?></label></div></div>
                     <div class="col-12"><div class="form-floating"><textarea class="form-control" id="description" name="message" placeholder="Description" style="height: 120px"></textarea><label for="description"><i class="fas fa-edit me-2"></i><?php echo $text['product_form_needsLabel'] ?? 'Describe your specific needs'; ?></label></div></div>
+                    <!-- Identify form + redirect back to this section with language -->
+                    <input type="hidden" name="form_source" value="product" />
+                    <input type="hidden" name="subject" value="Product page custom solution request" />
+                    <input type="hidden" name="redirect" value="product.php?lang=<?php echo $lang; ?>#custom-form" />
                     <div class="col-12"><button type="submit" class="btn btn-primary btn-lg w-100 btn-submit"><span class="btn-text"><i class="fas fa-paper-plane me-2"></i><?php echo $text['product_form_submitButton'] ?? 'Submit Request'; ?></span><span class="btn-loading d-none"><i class="fas fa-spinner fa-spin me-2"></i><?php echo $text['product_form_sendingButton'] ?? 'Sending...'; ?></span></button></div>
                   </div>
                 </form>

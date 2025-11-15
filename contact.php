@@ -6,6 +6,13 @@ $text = file_exists($lang_file) ? json_decode(file_get_contents($lang_file), tru
 
 // The page title uses the specific 'contact_pageTitle' key.
 $pageTitle = $text['contact_pageTitle'] ?? 'Contact Us - RAWEE Smart Farming Solutions';
+
+// Shared form handler path (works whether site lives under /rawee or root)
+$basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
+  $basePath = '';
+}
+$sendMessageAction = $basePath . '/php/send_message.php';
 // ========================================================================================
 ?>
 <!DOCTYPE html>
@@ -81,10 +88,20 @@ $pageTitle = $text['contact_pageTitle'] ?? 'Contact Us - RAWEE Smart Farming Sol
 
             <div class="contact-form-wrapper">
               <h3><?php echo $text['contact_formTitle'] ?? 'Send Us a Message'; ?></h3>
-              <form class="contact-form" action="php/contact_handler.php" method="POST">
+              <?php if (isset($_GET['status'])): 
+                $isSuccess = $_GET['status'] === 'success';
+                $statusMessage = $isSuccess
+                  ? ($text['contact_formSuccess'] ?? 'Your message was sent successfully.')
+                  : ($text['contact_formError'] ?? 'Something went wrong. Please try again.');
+              ?>
+                <div class="form-status" style="padding:12px 16px;margin-bottom:1rem;border-radius:10px;background:<?php echo $isSuccess ? '#e6f4ea' : '#fdeaea'; ?>;color:<?php echo $isSuccess ? '#0f5132' : '#842029'; ?>;font-weight:500;">
+                  <?php echo $statusMessage; ?>
+                </div>
+              <?php endif; ?>
+              <form class="contact-form" action="<?php echo $sendMessageAction; ?>" method="POST">
                 <div class="input-group">
                   <label for="contactName"><?php echo $text['contact_formNameLabel'] ?? 'Full Name'; ?></label>
-                  <input type="text" id="contactName" name="full_name" placeholder="<?php echo $text['contact_formNamePlaceholder'] ?? 'e.g., Alex Johnson'; ?>" required />
+                  <input type="text" id="contactName" name="name" placeholder="<?php echo $text['contact_formNamePlaceholder'] ?? 'e.g., Alex Johnson'; ?>" required />
                 </div>
                 <div class="input-group">
                   <label for="contactEmail"><?php echo $text['contact_formEmailLabel'] ?? 'Email Address'; ?></label>
@@ -98,6 +115,9 @@ $pageTitle = $text['contact_pageTitle'] ?? 'Contact Us - RAWEE Smart Farming Sol
                   <label for="contactMessage"><?php echo $text['contact_formMessageLabel'] ?? 'Your Message'; ?></label>
                   <textarea id="contactMessage" name="message" rows="6" placeholder="<?php echo $text['contact_formMessagePlaceholder'] ?? 'Please describe your inquiry...'; ?>" required></textarea>
                 </div>
+                <!-- Identify form + redirect back to this page with language -->
+                <input type="hidden" name="form_source" value="contact" />
+                <input type="hidden" name="redirect" value="contact.php?lang=<?php echo $lang; ?>" />
                 <button type="submit" class="btn-submit-contact">
                   <i class="fas fa-paper-plane"></i> <?php echo $text['contact_formSendButton'] ?? 'Send Message'; ?>
                 </button>

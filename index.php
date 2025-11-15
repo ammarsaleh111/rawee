@@ -6,6 +6,13 @@ $text = file_exists($lang_file) ? json_decode(file_get_contents($lang_file), tru
 
 // The page title uses the specific 'index_pageTitle' key.
 $pageTitle = $text['index_pageTitle'] ?? 'RAWEE - Smart Farming Solutions';
+
+// Shared form handler path (works under /rawee or custom virtual host)
+$basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
+  $basePath = '';
+}
+$sendMessageAction = $basePath . '/php/send_message.php';
 // ========================================================================================
 ?>
 <!DOCTYPE html>
@@ -251,7 +258,17 @@ $pageTitle = $text['index_pageTitle'] ?? 'RAWEE - Smart Farming Solutions';
         <p>
           <?php echo $text['index_contactSubtitle'] ?? 'Ready to see how RAWEE can work for you?...'; ?>
         </p>
-        <form class="contact-form">
+        <?php if (isset($_GET['status'])): 
+          $isSuccess = $_GET['status'] === 'success';
+          $statusMessage = $isSuccess
+            ? ($text['index_contactSuccess'] ?? 'Thanks! We will be in touch shortly.')
+            : ($text['index_contactError'] ?? 'Unable to send your request. Please try again.');
+        ?>
+          <div class="form-status" style="padding:12px 16px;margin-bottom:1.5rem;border-radius:10px;background:<?php echo $isSuccess ? '#e6f4ea' : '#fdeaea'; ?>;color:<?php echo $isSuccess ? '#0f5132' : '#842029'; ?>;font-weight:500;">
+            <?php echo $statusMessage; ?>
+          </div>
+        <?php endif; ?>
+        <form class="contact-form" action="<?php echo $sendMessageAction; ?>" method="POST">
           <input type="text" name="name" placeholder="<?php echo $text['index_contactNamePlaceholder'] ?? 'Your Name'; ?>" required />
           <input type="email" name="email" placeholder="<?php echo $text['index_contactEmailPlaceholder'] ?? 'Your Email'; ?>" required />
           <textarea
@@ -260,6 +277,10 @@ $pageTitle = $text['index_pageTitle'] ?? 'RAWEE - Smart Farming Solutions';
             rows="5"
             required
           ></textarea>
+          <!-- Identify form + redirect back to this section with language -->
+          <input type="hidden" name="form_source" value="home" />
+          <input type="hidden" name="subject" value="Home page consultation request" />
+          <input type="hidden" name="redirect" value="index.php?lang=<?php echo $lang; ?>#contact" />
           <button type="submit" class="cta-button">
             <?php echo $text['index_contactButton'] ?? 'Request a Consultation'; ?>
           </button>
