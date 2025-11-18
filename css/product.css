@@ -148,7 +148,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 999;
+  /* Ensure header and its fixed children (mobile nav) sit above page overlay */
+  z-index: 1300;
   padding: 1rem 0;
   transition: background-color 0.4s ease, backdrop-filter 0.4s ease,
     box-shadow 0.4s ease, padding 0.4s ease;
@@ -1358,6 +1359,17 @@ body {
     border: 1px solid var(--gray-300);
   }
 }
+/* ======================= NAV OVERLAY STACKING FIX (PRODUCT PAGE) ======================= */
+/* Ensure the header and its mobile nav sit above the global nav overlay on this page */
+.main-header {
+  z-index: 2001 !important;
+}
+.primary-nav {
+  z-index: 2002 !important;
+}
+.nav-overlay {
+  z-index: 2000 !important;
+}
 /* ======================= LOGIN/SIGN-UP MODAL STYLES ======================= */
 .auth-modal {
   position: fixed;
@@ -1526,4 +1538,244 @@ body {
 
 .switch-form-text a:hover {
   text-decoration: underline;
+}
+
+/* ======================= RESPONSIVE PRODUCTS PAGE ======================= */
+
+/* Filters Overlay */
+.filters-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 32, 43, 0.5);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1100;
+}
+
+.filters-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sticky Filter Button */
+.sticky-filter-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1090;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 16px rgba(7, 122, 125, 0.3), 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sticky-filter-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.sticky-filter-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 24px rgba(7, 122, 125, 0.4), 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sticky-filter-btn:active {
+  transform: scale(0.95);
+}
+
+/* RTL adjustments */
+html[dir="rtl"] .sticky-filter-btn {
+  right: auto;
+  left: 20px;
+}
+
+/* Hide sticky button on desktop */
+@media (min-width: 1080px) {
+  .sticky-filter-btn {
+    display: none !important;
+  }
+}
+
+/* Mobile close button in filter header */
+.mobile-close-filters {
+  display: none;
+}
+
+.filter-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ======================= BREAKPOINT: < 1080px (Tablets) ======================= */
+@media (max-width: 1079px) {
+  /* Hide sidebar by default, show as slide-in panel */
+  #filtersSidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 380px;
+    z-index: 3000;
+    margin: 0 !important;
+    padding: 0;
+    /* Ensure full-height, GPU-accelerated slide and no initial flicker */
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    transform: translate3d(100%, 0, 0);
+    backface-visibility: hidden;
+    will-change: transform;
+    contain: layout paint;
+    visibility: hidden;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s linear 0.35s;
+    background: #fff;
+    overflow-y: auto;
+  }
+
+  /* RTL: slide from left */
+  html[dir="rtl"] #filtersSidebar {
+    right: auto;
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  #filtersSidebar.open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
+  }
+
+  #filtersSidebar .filter-card {
+    height: 100%;
+    border-radius: 0;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+  }
+
+  html[dir="rtl"] #filtersSidebar .filter-card {
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Close button sits with Clear; push to far right on small screens */
+  #filtersSidebar .mobile-close-filters {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(7, 122, 125, 0.06);
+    border: none;
+    color: var(--rich-black);
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  /* Use auto margin to separate from Clear when cramped */
+  #filtersSidebar .filter-header-actions > #closeFiltersBtn {
+    margin-left: auto;
+  }
+  #filtersSidebar .mobile-close-filters:hover {
+    background: rgba(7, 122, 125, 0.12);
+    transform: scale(1.03);
+  }
+
+  /* Expand product grid to full width */
+  #productsSection .col-lg-9.col-md-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Product cards: 2 columns */
+  #productGrid > .col-md-6,
+  #productGrid > .col-lg-4 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Action buttons: 2 per row (50% width each) */
+  .product-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .product-actions > a,
+  .product-actions > button {
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+}
+
+/* ======================= BREAKPOINT: < 750px (Large Phones) ======================= */
+@media (max-width: 749px) {
+  /* Product cards: still 2 columns */
+  #productGrid > .col-md-6,
+  #productGrid > .col-lg-4 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Action buttons: full width (stacked) */
+  .product-actions > a,
+  .product-actions > button {
+    flex: 1 1 100%;
+  }
+
+  /* Slightly narrower sidebar on smaller screens */
+  #filtersSidebar {
+    width: 90%;
+    max-width: 320px;
+  }
+}
+
+/* ======================= BREAKPOINT: < 550px (Phones) ======================= */
+@media (max-width: 549px) {
+  /* Product cards: 1 column (full width) */
+  #productGrid > .col-md-6,
+  #productGrid > .col-lg-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Action buttons: remain full width */
+  .product-actions > a,
+  .product-actions > button {
+    flex: 1 1 100%;
+  }
+
+  /* Sidebar takes more space on very small screens */
+  #filtersSidebar {
+    width: 92%;
+    max-width: 100%;
+  }
+
+  /* Adjust sticky button size for small screens */
+  .sticky-filter-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 1.1rem;
+    right: 16px;
+    bottom: 16px;
+  }
+
+  html[dir="rtl"] .sticky-filter-btn {
+    right: auto;
+    left: 16px;
+  }
 }

@@ -41,7 +41,7 @@ const loadingScreen = document.getElementById("loading-screen");
 document.addEventListener("DOMContentLoaded", function() {
   // Hide loading screen
   setTimeout(() => {
-    loadingScreen.classList.add("hidden");
+    if (loadingScreen) loadingScreen.classList.add("hidden");
   }, 1500);
 
   // Initialize components
@@ -108,12 +108,104 @@ function initializeEventListeners() {
     gridView.addEventListener("click", () => setView("grid"));
     listView.addEventListener("click", () => setView("list"));
   }
+
+  // ======================= RESPONSIVE FILTERS PANEL =======================
+  const filtersSidebar = document.getElementById("filtersSidebar");
+  const filtersOverlay = document.getElementById("filtersOverlay");
+  const stickyFilterBtn = document.getElementById("stickyFilterBtn");
+  const closeFiltersBtn = document.getElementById("closeFiltersBtn");
+
+  // Open filters panel
+  const openFilters = () => {
+    if (!filtersSidebar || !filtersOverlay) return;
+    filtersSidebar.classList.add("open");
+    filtersOverlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+    // Hide sticky button while panel is open
+    if (stickyFilterBtn) stickyFilterBtn.classList.remove("visible");
+  };
+
+  // Close filters panel
+  const closeFilters = () => {
+    if (!filtersSidebar || !filtersOverlay) return;
+    filtersSidebar.classList.remove("open");
+    filtersOverlay.classList.remove("active");
+    document.body.style.overflow = "";
+    // Re-show sticky button immediately if on small screen and in products section
+    const isSmallScreen = window.matchMedia("(max-width: 1079px)").matches;
+    const productsSection = document.getElementById("productsSection") || 
+                            document.querySelector(".products-container") || 
+                            document.querySelector("section.container.my-5");
+    if (stickyFilterBtn && isSmallScreen && productsSection) {
+      // Check if products section is visible in viewport
+      const rect = productsSection.getBoundingClientRect();
+      const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+      if (isInViewport) {
+        stickyFilterBtn.classList.add("visible");
+      }
+    }
+  };
+
+  // Bind sticky filter button
+  if (stickyFilterBtn) {
+    stickyFilterBtn.addEventListener("click", openFilters);
+  }
+
+  // Bind close button inside sidebar
+  if (closeFiltersBtn) {
+    closeFiltersBtn.addEventListener("click", closeFilters);
+  }
+
+  // Bind overlay click to close
+  if (filtersOverlay) {
+    filtersOverlay.addEventListener("click", closeFilters);
+  }
+
+  // Close on ESC key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && filtersSidebar && filtersSidebar.classList.contains("open")) {
+      closeFilters();
+    }
+  });
+
+  // Show/hide sticky button based on products section visibility and screen size
+  if (stickyFilterBtn && "IntersectionObserver" in window) {
+    const productsSection = document.getElementById("productsSection") || 
+                            document.querySelector(".products-container") || 
+                            document.querySelector("section.container.my-5");
+    
+    if (productsSection) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const isSmallScreen = window.matchMedia("(max-width: 1079px)").matches;
+          const panelOpen = filtersSidebar && filtersSidebar.classList.contains("open");
+          
+          if (entry.isIntersecting && isSmallScreen && !panelOpen) {
+            stickyFilterBtn.classList.add("visible");
+          } else {
+            stickyFilterBtn.classList.remove("visible");
+          }
+        });
+      }, { threshold: 0.1, rootMargin: "-10% 0px -30% 0px" });
+      
+      observer.observe(productsSection);
+
+      // Hide button on resize to desktop width
+      window.addEventListener("resize", debounce(() => {
+        const isSmallScreen = window.matchMedia("(max-width: 1079px)").matches;
+        if (!isSmallScreen) {
+          stickyFilterBtn.classList.remove("visible");
+          closeFilters(); // Auto-close panel when resizing to desktop
+        }
+      }, 150));
+    }
+  }
 }
 
 // Search functionality
 function handleSearch(event) {
   currentFilters.search = event.target.value.toLowerCase();
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 // Category filter
@@ -122,7 +214,7 @@ function handleCategoryChange() {
     .filter(cb => cb.checked)
     .map(cb => cb.value);
   currentFilters.categories = selectedCategories;
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 // Price range filter
@@ -130,7 +222,7 @@ function handlePriceChange(event) {
   currentFilters.priceRange = parseInt(event.target.value);
   updatePriceDisplay();
   // update server-side filter
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 function updatePriceDisplay() {
@@ -142,26 +234,26 @@ function updatePriceDisplay() {
 // Availability filter
 function handleAvailabilityChange(event) {
   currentFilters.availability = event.target.value;
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 // Sort functionality
 function handleSortChange(event) {
   currentFilters.sortBy = event.target.value;
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 // Items per page
 function handleItemsPerPageChange(event) {
   itemsPerPage = parseInt(event.target.value);
   currentPage = 1;
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 // Apply filters
 function applyFilters() {
   // Server-driven filters: fetch products from backend
-  fetchProducts(1);
+  fetchProducts(1, { scroll: true });
 }
 
 // Sort products
@@ -259,18 +351,24 @@ function createProductCard(product) {
                 "☆".repeat(5 - Math.ceil(rating));
 
   // Normalize image source from API: could be filename, 'uploads/...' path or full URL
-  let imageSrc = '/images/hero.avif';
+  // Use a relative fallback so it resolves under the current site root (e.g., /rawee/)
+  let imageSrc = 'images/hero.avif';
   if (product.image_url) {
     const raw = product.image_url;
     if (/^https?:\/\//i.test(raw)) {
       imageSrc = raw;
-    } else if (raw.indexOf('uploads/') === 0 || raw.indexOf('/uploads/') === 0) {
-      imageSrc = raw;
-    } else if (raw.trim() !== '') {
-      imageSrc = 'uploads/' + raw;
+    } else {
+      // Make relative to current app root by stripping any leading '/'
+      const normalized = String(raw).replace(/^\/+/, '');
+      if (normalized.indexOf('uploads/') === 0) {
+        imageSrc = normalized;
+      } else if (normalized.trim() !== '') {
+        imageSrc = 'uploads/' + normalized;
+      }
     }
   } else if (product.image) {
-    imageSrc = product.image;
+    // Also normalize any leading slash here to keep paths relative to app root
+    imageSrc = String(product.image).replace(/^\/+/, '');
   }
 
   // Match server-side 'product-card-themed' structure so styles and cart logic are consistent
@@ -379,7 +477,7 @@ function changePage(page) {
     return;
   }
   // Fetch the requested page from server
-  fetchProducts(page);
+  fetchProducts(page, { scroll: true });
   // Scroll to top of products after fetch completes (fetchProducts will render and scroll)
 }
 
@@ -444,14 +542,14 @@ function initializeHeaderScroll() {
   let lastScrollY = window.scrollY;
   
   window.addEventListener("scroll", function () {
-  const header = document.getElementById("header") || document.querySelector(".main-header") || document.getElementById("mainHeader");
-  if (!header) return;
-  if (window.scrollY > 50) {
-    header.classList.add("scrolled");
-  } else {
-    header.classList.remove("scrolled");
-  }
-});
+    const header = document.getElementById("header") || document.querySelector(".main-header") || document.getElementById("mainHeader");
+    if (!header) return;
+    if (window.scrollY > 50) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
+    }
+  });
 }
 
 // Scroll animations
@@ -554,10 +652,12 @@ if ("IntersectionObserver" in window) {
 
  window.addEventListener("scroll", function () {
     const header = document.getElementById("header");
-    if (window.scrollY > 50) {
-      header.classList.add("scrolled");
-    } else {
-      header.classList.remove("scrolled");
+    if (header) {
+      if (window.scrollY > 50) {
+        header.classList.add("scrolled");
+      } else {
+        header.classList.remove("scrolled");
+      }
     }
   });
 
@@ -579,7 +679,7 @@ function buildApiUrl(page = 1) {
   return `php/get_products.php?${params.toString()}`;
 }
 
-function fetchProducts(page = 1) {
+function fetchProducts(page = 1, options = { scroll: false }) {
   const url = buildApiUrl(page);
   // show loading
   if (loadingScreen) loadingScreen.classList.remove('hidden');
@@ -603,9 +703,11 @@ function fetchProducts(page = 1) {
       renderPagination();
       updateResultsInfo();
 
-      // smooth scroll to products
-      const container = document.querySelector('.products-container');
-      if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // smooth scroll to products only when explicitly requested (user interaction)
+      if (options && options.scroll) {
+        const container = document.querySelector('.products-container');
+        if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     })
     .catch(err => {
       console.error('Fetch failed', err);

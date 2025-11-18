@@ -31,8 +31,12 @@ $sendMessageAction = $basePath . '/php/send_message.php';
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/product.css" />
-    <link rel="stylesheet" href="css/style.css" />
+    <?php
+      $styleCssVer = @filemtime(__DIR__ . '/css/style.css') ?: time();
+      $productCssVer = @filemtime(__DIR__ . '/css/product.css') ?: time();
+    ?>
+    <link rel="stylesheet" href="css/style.css?v=<?php echo $styleCssVer; ?>" />
+    <link rel="stylesheet" href="css/product.css?v=<?php echo $productCssVer; ?>" />
     <?php if ($lang == 'ar' ): ?>
       <link rel="stylesheet" href="css/rtl.css" />
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -83,16 +87,21 @@ $sendMessageAction = $basePath . '/php/send_message.php';
     <main class="container-fluid">
     
       <!-- Products Section -->
-      <section class="container my-5">
+      <section class="container my-5" id="productsSection">
         <div class="row">
           <!-- Sidebar Filters -->
-          <aside class="col-lg-3 col-md-4 my-4">
+          <aside class="col-lg-3 col-md-4 my-4" id="filtersSidebar">
             <div class="filter-card shadow-lg">
               <div class="filter-header">
                 <h5><i class="fas fa-filter me-2"></i><?php echo $text['product_filter_title'] ?? 'Filter'; ?></h5>
-                <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
-                  <i class="fas fa-times"></i> <?php echo $text['product_filter_clear'] ?? 'Clear'; ?>
-                </button>
+                <div class="filter-header-actions">
+                  <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
+                    <i class="fas fa-times"></i> <?php echo $text['product_filter_clear'] ?? 'Clear'; ?>
+                  </button>
+                  <button class="btn btn-sm btn-light mobile-close-filters" id="closeFiltersBtn" aria-label="Close filters">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
 
               <div class="search-section mb-4">
@@ -346,7 +355,7 @@ echo '</div>';
               <div class="contact-visual">
                 <div class="image-container">
                   <img
-                    src="/rawee/rawee/images/hero.avif"
+                    src="images/hero.avif"
                     class="img-fluid rounded-4 shadow-lg"
                     alt="Smart farm with IoT sensors"
                   />
@@ -386,6 +395,14 @@ echo '</div>';
         </div>
       </section>
     </main>
+
+    <!-- Sticky Filter Button (visible on small screens) -->
+    <button type="button" id="stickyFilterBtn" class="sticky-filter-btn" aria-label="Open filters">
+      <i class="fas fa-filter"></i>
+    </button>
+
+    <!-- Filters Overlay -->
+    <div class="filters-overlay" id="filtersOverlay" aria-hidden="true"></div>
 
     <!-- Success Modal -->
     <div class="modal fade" id="successModal" tabindex="-1">

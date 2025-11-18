@@ -110,30 +110,70 @@ $lang_switch_url = $current_script . '?' . http_build_query($new_query);
 </header>
 <div class="nav-overlay" id="navOverlay" onclick="toggleMobileMenu(false)"></div>
 <script>
-  function toggleMobileMenu(forceState){
-    const nav = document.getElementById('primaryNav');
-    const burger = document.getElementById('hamburger');
-    const overlay = document.getElementById('navOverlay');
-    const body = document.body;
-    const willOpen = (typeof forceState === 'boolean') ? forceState : !nav.classList.contains('open');
-    
-    if(willOpen){
-        nav.classList.add('open');
-        overlay.classList.add('active');
-        burger.classList.add('active');
-        burger.setAttribute('aria-expanded','true');
-        body.classList.add('nav-open');
-        // focus first link for accessibility
-        const first = nav.querySelector('a');
-        if(first) first.focus();
-    } else {
-        nav.classList.remove('open');
-        overlay.classList.remove('active');
-        burger.classList.remove('active');
-        burger.setAttribute('aria-expanded','false');
+    // ======================= HAMBURGER MENU FIX =======================
+    // On page load, ensure no leftover nav states from previous page and restore scroll if needed
+    (function () {
+        const body = document.body;
         body.classList.remove('nav-open');
+        const overlay = document.getElementById('navOverlay');
+        if (overlay) overlay.classList.remove('active');
+        // If a previous session left the body fixed, restore scroll
+        if (body.style.position === 'fixed' && body.style.top) {
+            const y = Math.abs(parseInt(body.style.top, 10)) || 0;
+            body.style.position = '';
+            body.style.top = '';
+            body.style.left = '';
+            body.style.right = '';
+            body.style.width = '';
+            window.scrollTo(0, y);
+        }
+    })();
+
+    function toggleMobileMenu(forceState) {
+        const nav = document.getElementById('primaryNav');
+        const burger = document.getElementById('hamburger');
+        const overlay = document.getElementById('navOverlay');
+        const body = document.body;
+        const willOpen = typeof forceState === 'boolean' ? forceState : !nav.classList.contains('open');
+
+        if (willOpen) {
+            // Preserve current scroll and lock body without layout jump
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+            body.dataset.scrollY = String(scrollY);
+            body.style.position = 'fixed';
+            body.style.top = `-${scrollY}px`;
+            body.style.left = '0';
+            body.style.right = '0';
+            body.style.width = '100%';
+            body.classList.add('nav-open');
+
+            nav.classList.add('open');
+            overlay.classList.add('active');
+            burger.classList.add('active');
+            burger.setAttribute('aria-expanded', 'true');
+
+            // focus first link for accessibility
+            const first = nav.querySelector('a');
+            if (first) first.focus();
+        } else {
+            // Unlock body and restore scroll
+            const saved = parseInt(body.dataset.scrollY || '0', 10) || 0;
+            body.classList.remove('nav-open');
+            body.style.position = '';
+            body.style.top = '';
+            body.style.left = '';
+            body.style.right = '';
+            body.style.width = '';
+
+            nav.classList.remove('open');
+            overlay.classList.remove('active');
+            burger.classList.remove('active');
+            burger.setAttribute('aria-expanded', 'false');
+
+            // Use rAF to ensure styles were flushed before restoring scroll
+            requestAnimationFrame(() => window.scrollTo(0, saved));
+        }
     }
-}
 
 document.addEventListener('keydown', e => { 
     // Close on Escape key press
