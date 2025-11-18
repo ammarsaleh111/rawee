@@ -42,10 +42,19 @@ if ($isLoggedIn) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><?php echo $pageTitle; ?></title>
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/cart.css" /> <!-- We will create this file -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+        <title><?php echo $pageTitle; ?></title>
+        <?php $styleVer = @filemtime(__DIR__ . '/css/style.css') ?: time(); ?>
+        <?php $cartVer = @filemtime(__DIR__ . '/css/cart.css') ?: time(); ?>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <?php if ($lang == 'ar'): ?>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+        <?php endif; ?>
+        <link rel="stylesheet" href="css/style.css?v=<?php echo $styleVer; ?>" />
+        <link rel="stylesheet" href="css/cart.css?v=<?php echo $cartVer; ?>" />
 </head>
 <body data-logged-in="<?php echo $isLoggedIn ? 'true' : 'false'; ?>">
     <?php include 'includes/header.php'; ?>
@@ -90,10 +99,12 @@ if ($isLoggedIn) {
                                     <input type="number" value="<?php echo $item['quantity']; ?>" min="1" onchange="setQuantity(<?php echo $item['product_id']; ?>, this.value)">
                                     <button class="quantity-btn plus" onclick="updateQuantity(<?php echo $item['product_id']; ?>, 1)">+</button>
                                 </div>
-                                <div class="item-total-price" data-price="<?php echo $item['price']; ?>">
-                                    $<?php echo number_format($item['price'] * $item['quantity'], 2); ?>
-                                </div>
-                                <button class="item-remove" onclick="removeItem(<?php echo $item['product_id']; ?>)"><i class="fas fa-trash"></i></button>
+                                <div class="item-price-and-remove">
+	                                    <div class="item-total-price" data-price="<?php echo $item['price']; ?>">
+	                                        $<?php echo number_format($item['price'] * $item['quantity'], 2); ?>
+	                                    </div>
+	                                    <button class="item-remove" onclick="removeItem(<?php echo $item['product_id']; ?>)"><i class="fas fa-trash"></i></button>
+	                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -125,7 +136,6 @@ if ($isLoggedIn) {
     </main>
 
     <?php include 'includes/footer.php'; ?>
-    <script src="js/cart_ajax.js"></script>
         <script>
             // If the server redirected with ?login=1, open the auth modal after load
             (function() {

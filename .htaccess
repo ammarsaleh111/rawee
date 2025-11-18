@@ -1,0 +1,17 @@
+# Enable rewriting engine if needed by future rules
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Optional: set base if served under subfolder
+  # RewriteBase /rawee/
+</IfModule>
+
+# Send all 404s to our themed 404 page
+
+ErrorDocument 404 /rawee/404.php
+
+# Security hardening (optional but safe)
+
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>

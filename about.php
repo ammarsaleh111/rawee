@@ -28,8 +28,14 @@ $pageTitle = $text['pageTitle'] ?? 'About Us - RAWEE Smart Farming';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><?php echo $pageTitle; ?></title>
 
-    <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="css/style.css" />
+    <?php $styleCssVer = @filemtime(__DIR__ . '/css/style.css') ?: time(); ?>
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css?v=<?php echo $styleCssVer; ?>" />
 
     <!-- This stylesheet is loaded ONLY for Arabic to fix right-to-left layout issues -->
     <?php if ($lang == 'ar'): ?>
@@ -38,13 +44,7 @@ $pageTitle = $text['pageTitle'] ?? 'About Us - RAWEE Smart Farming';
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <?php endif; ?>
 
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <?php
@@ -218,10 +218,6 @@ $pageTitle = $text['pageTitle'] ?? 'About Us - RAWEE Smart Farming';
     </main>
 
     <?php include 'includes/footer.php'; ?>
-    
-    <!-- Your Login/Sign-up Modal would also need to be updated with dynamic text -->
-    <!-- I have left it out for brevity, but the same principle applies -->
 
-    <script src="js/edits.js"></script>
   </body>
 </html>

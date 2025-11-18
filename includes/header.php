@@ -2,7 +2,8 @@
 // This header file assumes $lang and $text have been defined by the parent page (e.g., index.php)
 
 // Session and Login Logic
-if (session_status() === PHP_SESSION_NONE) {
+// Start session only if headers are not already sent to avoid warnings
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 $isLoggedIn = isset($_SESSION['user_id']);
@@ -63,6 +64,16 @@ $lang_switch_url = $current_script . '?' . http_build_query($new_query);
                     <a href="userProfile.php?lang=<?php echo $lang; ?>" class="mobile-auth-link"><i class="fas fa-user-circle"></i> <?php echo $text['header_myProfile'] ?? 'My Profile'; ?></a>
                     <a href="php/logout_handler.php" class="mobile-auth-link"><i class="fas fa-sign-out-alt"></i> <?php echo $text['header_logout'] ?? 'Logout'; ?></a>
                 <?php endif; ?>
+                <?php if (!$isLoggedIn): ?>
+                    <div class="mobile-auth-buttons">
+                        <a href="#" class="btn btn-secondary" onclick="openLoginModal(); return false;">
+                            <?php echo $text['header_login'] ?? 'Login'; ?>
+                        </a>
+                        <a href="#" class="btn btn-primary" onclick="openSignupModal(); return false;">
+                            <?php echo $text['header_signup'] ?? 'Sign Up'; ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
             <button class="nav-close" type="button" aria-label="Close menu" onclick="toggleMobileMenu(false)">×</button>
         </nav>
@@ -95,7 +106,7 @@ $lang_switch_url = $current_script . '?' . http_build_query($new_query);
                 <button class="icon-btn lang-switcher" aria-label="Switch language" onclick="window.location.href='<?php echo $lang_switch_url; ?>'">
                     <i class="fas fa-globe"></i>
                 </button>
-                <a href="cart.php?lang=<?php echo $lang; ?>" class="header-cart-icon" id="headerCartIcon">
+                <a href="#" class="header-cart-icon" id="headerCartIcon">
                     <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                     <?php if ($cartItemCount > 0): ?>
                         <span class="cart-item-count" aria-label="<?php echo $cartItemCount; ?> items in cart"><?php echo $cartItemCount; ?></span>

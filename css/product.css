@@ -1723,26 +1723,7 @@ html[dir="rtl"] .sticky-filter-btn {
 }
 
 /* ======================= BREAKPOINT: < 750px (Large Phones) ======================= */
-@media (max-width: 749px) {
-  /* Product cards: still 2 columns */
-  #productGrid > .col-md-6,
-  #productGrid > .col-lg-4 {
-    flex: 0 0 50%;
-    max-width: 50%;
-  }
 
-  /* Action buttons: full width (stacked) */
-  .product-actions > a,
-  .product-actions > button {
-    flex: 1 1 100%;
-  }
-
-  /* Slightly narrower sidebar on smaller screens */
-  #filtersSidebar {
-    width: 90%;
-    max-width: 320px;
-  }
-}
 
 /* ======================= BREAKPOINT: < 550px (Phones) ======================= */
 @media (max-width: 549px) {
@@ -1753,12 +1734,7 @@ html[dir="rtl"] .sticky-filter-btn {
     max-width: 100%;
   }
 
-  /* Action buttons: remain full width */
-  .product-actions > a,
-  .product-actions > button {
-    flex: 1 1 100%;
-  }
-
+ 
   /* Sidebar takes more space on very small screens */
   #filtersSidebar {
     width: 92%;

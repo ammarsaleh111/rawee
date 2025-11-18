@@ -1,4 +1,6 @@
-/* css/cart.css */
+/* css/cart.css - Fully Responsive and Enhanced Version */
+
+/* --- Base Styles (Desktop First) --- */
 .cart-page-main {
   padding: 4rem 0;
   background-color: var(--gray-100);
@@ -10,16 +12,20 @@
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--gray-300);
   padding-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 .cart-header h1 {
   color: var(--dark-primary);
   margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
 }
 .continue-shopping {
   color: var(--primary-color);
   font-weight: 600;
   text-decoration: none;
   transition: color var(--transition-fast);
+  white-space: nowrap;
 }
 .continue-shopping:hover {
   color: var(--primary-dark);
@@ -37,13 +43,13 @@
 }
 .cart-item {
   display: grid;
-  grid-template-columns: 80px 1fr 120px 100px 30px;
+  grid-template-columns: 80px 1fr 120px 100px 30px; /* img | details | quantity | total | remove */
   align-items: center;
   gap: 1.5rem;
   background: #fff;
   padding: 1.5rem;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md); /* Enhanced shadow for better lift */
 }
 .cart-item img {
   width: 80px;
@@ -63,6 +69,7 @@
 .item-quantity {
   display: flex;
   align-items: center;
+  justify-content: center; /* Center quantity controls */
 }
 .item-quantity input {
   width: 50px;
@@ -71,6 +78,7 @@
   border-radius: var(--radius-sm);
   margin: 0 0.5rem;
   -moz-appearance: textfield;
+  padding: 0.25rem 0; /* Added padding for better touch target */
 }
 .item-quantity input::-webkit-outer-spin-button,
 .item-quantity input::-webkit-inner-spin-button {
@@ -86,6 +94,7 @@
   cursor: pointer;
   font-weight: 600;
   transition: background-color var(--transition-fast);
+  flex-shrink: 0; /* Ensure buttons don't shrink */
 }
 .quantity-btn:hover {
   background-color: var(--gray-300);
@@ -110,7 +119,7 @@
   background: #fff;
   padding: 2rem;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   position: sticky;
   top: 2rem;
 }
@@ -164,3 +173,224 @@
   color: var(--gray-600);
   margin-top: 1rem;
 }
+
+/* --- Media Queries --- */
+
+/* Tablet/Small Desktop (Max 992px) */
+@media (max-width: 992px) {
+  .cart-container {
+    grid-template-columns: 1fr; /* Stack cart items and summary */
+  }
+  .cart-summary {
+    position: static; /* Remove sticky positioning */
+    top: auto;
+    margin-top: 1rem;
+  }
+}
+
+/* Medium Tablet (Max 770px) */
+@media (max-width: 770px) {
+  .cart-page-main {
+    padding: 2rem 0;
+  }
+  .cart-container {
+    gap: 1.5rem;
+  }
+  /* Cart Item Layout Change: 5-column to 2-column, 2-row */
+  .cart-item {
+    grid-template-columns: 60px 1fr; /* img | details/other */
+    grid-template-rows: auto auto; /* row 1: details/total, row 2: quantity/remove */
+    gap: 0.75rem 1rem;
+    padding: 1rem;
+  }
+  .cart-item img {
+    grid-row: 1 / 3; /* Image spans both rows */
+    width: 60px;
+    height: 60px;
+  }
+  .item-details {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .item-details h5 {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+  .item-price {
+    font-size: 0.85rem;
+  }
+  .item-quantity {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-start; /* Align quantity to the left */
+    gap: 0.5rem;
+  }
+  .item-quantity input {
+    width: 40px;
+    margin: 0 0.25rem;
+  }
+  .quantity-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.9rem;
+  }
+  .item-total-price {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+    font-size: 1rem;
+    align-self: start;
+  }
+  .item-remove {
+    /* Hidden at this size, as total price is in the same row */
+    display: none;
+  }
+  /* New wrapper for total price and remove button to prevent overlap */
+  .item-price-and-remove {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .item-price-and-remove .item-total-price {
+    text-align: right;
+    margin-left: auto; /* Push total price to the right */
+  }
+  .item-price-and-remove .item-remove {
+    display: block; /* Show remove button */
+    margin-left: 1rem;
+  }
+}
+
+/* Small Tablet/Large Phone (Max 650px) */
+@media (max-width: 650px) {
+  .cart-header h1 {
+    font-size: 1.8rem;
+  }
+  .cart-item {
+    padding: 0.85rem;
+    gap: 0.75rem;
+  }
+  .item-details h5 {
+    font-size: 0.9rem;
+  }
+  .item-price-and-remove .item-total-price {
+    font-size: 0.95rem;
+  }
+  .cart-summary {
+    padding: 1.5rem;
+  }
+  .summary-total {
+    font-size: 1.1rem;
+  }
+}
+
+/* Small Phone (Max 520px) - FIX AND ENHANCEMENT */
+@media (max-width: 520px) {
+  /* Cart Item Layout Change: 2-row to 3-row, ensuring stability */
+  .cart-item {
+    grid-template-columns: 50px 1fr; /* img | details/other */
+    grid-template-rows: auto auto auto; /* row 1: details, row 2: quantity, row 3: total/remove */
+    gap: 0.5rem 0.75rem;
+    padding: 0.85rem;
+  }
+  .cart-item img {
+    grid-row: 1 / 4; /* Image spans all three rows */
+    width: 50px;
+    height: 50px;
+  }
+  .item-details {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .item-details h5 {
+    font-size: 0.85rem;
+  }
+  .item-price {
+    font-size: 0.75rem;
+  }
+  .item-quantity {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-start;
+    margin-top: 0.25rem;
+  }
+  /* Total Price and Remove Button are now grouped in a flex container */
+  .item-price-and-remove {
+    grid-column: 2;
+    grid-row: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem; /* Added margin for separation */
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--gray-200); /* Visual separation line */
+  }
+  .item-price-and-remove .item-total-price {
+    font-size: 0.9rem;
+    text-align: left;
+    margin-left: 0;
+  }
+  .item-price-and-remove .item-remove {
+    display: block;
+    margin-left: 0;
+  }
+  .cart-summary {
+    padding: 1.25rem;
+  }
+  .summary-total {
+    font-size: 1rem;
+  }
+  .btn-checkout {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+}
+
+/* Extra Small Phone (Max 375px) */
+@media (max-width: 375px) {
+  .cart-page-main {
+    padding: 1rem 0;
+  }
+  .cart-header h1 {
+    font-size: 1.5rem;
+  }
+  .cart-item {
+    grid-template-columns: 40px 1fr; /* Smaller image */
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .cart-item img {
+    width: 40px;
+    height: 40px;
+  }
+  .item-details h5 {
+    font-size: 0.8rem;
+  }
+  .item-price {
+    font-size: 0.7rem;
+  }
+  .item-quantity {
+    /* Inherits 520px layout */
+    margin-top: 0;
+  }
+  .item-price-and-remove {
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+  }
+  .item-price-and-remove .item-total-price {
+    font-size: 0.85rem;
+  }
+  .item-price-and-remove .item-remove {
+    font-size: 1rem;
+  }
+  .cart-summary {
+    padding: 1rem;
+  }
+  .summary-line,
+  .summary-total {
+    margin-bottom: 0.75rem;
+  }
+}
+

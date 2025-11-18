@@ -35,8 +35,9 @@ $sendMessageAction = $basePath . '/php/send_message.php';
       $styleCssVer = @filemtime(__DIR__ . '/css/style.css') ?: time();
       $productCssVer = @filemtime(__DIR__ . '/css/product.css') ?: time();
     ?>
-    <link rel="stylesheet" href="css/style.css?v=<?php echo $styleCssVer; ?>" />
     <link rel="stylesheet" href="css/product.css?v=<?php echo $productCssVer; ?>" />
+        <link rel="stylesheet" href="css/style.css?v=<?php echo $styleCssVer; ?>" />
+
     <?php if ($lang == 'ar' ): ?>
       <link rel="stylesheet" href="css/rtl.css" />
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -427,9 +428,11 @@ echo '</div>';
         </div>
       </div>
     </div>
-  <script src="js/cart_ajax.js"></script>
-  <script src="js/product.js"></script>
+  <!-- cart_ajax.js included globally in footer; removed duplicate include here -->
+ 
     <?php include __DIR__ . '/includes/footer.php'; ?>
   </body>
 </html>
+ <script src="js/cart_ajax.js"></script>
+  <script src="js/product.js"></script>
 

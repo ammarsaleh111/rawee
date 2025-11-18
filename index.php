@@ -289,6 +289,7 @@ $sendMessageAction = $basePath . '/php/send_message.php';
     </section>
 
     <?php include 'includes/footer.php'; ?>
+ <script src="js/cart_ajax.js"></script>
 
   </body>
 </html>

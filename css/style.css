@@ -379,6 +379,38 @@ html[dir="rtl"] .cart-item-count {
     flex-direction: column;
     gap: 0.9rem;
   }
+  /* Guest auth buttons at bottom of sidebar */
+  .mobile-auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+  }
+  .mobile-auth-buttons .btn {
+    width: 100%;
+    text-align: center;
+    font-weight: 600;
+    padding: 0.65rem 1.2rem;
+    border: 2px solid var(--teal);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+  }
+  .mobile-auth-buttons .btn.btn-primary {
+    background: var(--teal);
+    color: #fff;
+  }
+  .mobile-auth-buttons .btn.btn-secondary {
+    background: transparent;
+    color: var(--teal);
+  }
+  .mobile-auth-buttons .btn.btn-secondary:hover {
+    background: var(--teal);
+    color: #fff;
+  }
+  .mobile-auth-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
   .mobile-auth-link,
   .mobile-auth-btn {
     text-decoration: none;
@@ -2242,7 +2274,8 @@ html[dir="rtl"] .lang-switcher .fa-globe {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1999;
+  /* Raised above header (1300) and auth modal (2000) to ensure visibility */
+  z-index: 2500;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -2261,11 +2294,112 @@ html[dir="rtl"] .lang-switcher .fa-globe {
   max-width: 90%;
   height: 100%;
   background-color: #fff;
-  z-index: 2000;
+  /* Raised above header and overlay for guaranteed stacking */
+  z-index: 2510;
   box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.cart-sidebar .sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+.cart-sidebar .sidebar-item img {
+  width: 58px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.sidebar-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.sidebar-item-details h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--rich-black);
+}
+.sidebar-qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--gray-200);
+  padding: 4px 6px;
+  border-radius: var(--radius-md);
+}
+.sidebar-qty-controls .qty-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: var(--teal);
+  color: #fff;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease;
+}
+.sidebar-qty-controls .qty-btn:hover {
+  background: var(--blue-munsell);
+}
+.sidebar-qty-controls .qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rich-black);
+}
+.sidebar-qty-controls .remove-item {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  width: 26px;
+  height: 26px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease;
+}
+.sidebar-qty-controls .remove-item:hover {
+  background: #c53030;
+}
+.cart-sidebar .sidebar-item-price {
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 60px;
+  text-align: right;
+  color: var(--rich-black);
+}
+@media (max-width: 770px) {
+  .cart-sidebar {
+    width: 100%;
+    right: -100%;
+  }
+  .cart-sidebar.active {
+    right: 0;
+  }
+  .cart-sidebar .sidebar-item {
+    padding: 0.65rem 0.85rem;
+  }
+  .cart-sidebar .sidebar-item img {
+    width: 52px;
+    height: 52px;
+  }
 }
 
 .cart-sidebar.active {
@@ -2909,8 +3043,7 @@ html[dir="rtl"] .lang-switcher .fa-globe {
   box-shadow: var(--shadow-lg);
 }
 
-/* 6. Media Query for Mobile View */
-/* The sidebar should only be visible on mobile screens (max-width: 992px) */
+/* 6. Media Query for Desktop View (show horizontal nav from 992px up) */
 @media (min-width: 1080px) {
   .primary-nav {
     /* Reset for desktop: hide the mobile sidebar styles */
@@ -2922,7 +3055,8 @@ html[dir="rtl"] .lang-switcher .fa-globe {
     transform: translateX(0);
     box-shadow: none;
     padding: 0;
-    display: block; /* Or whatever the desktop display is */
+    display: block; /* Ensure it's visible on desktop */
+    visibility: visible;
   }
 
   .nav-overlay {

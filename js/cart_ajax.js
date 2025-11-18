@@ -148,20 +148,8 @@ function updateTotal() {
     }
 }
 
-/**
- * Handles the "Proceed to Checkout" button click.
- */
-function proceedToCheckout() {
-    const isLoggedIn = document.body.getAttribute('data-logged-in') === 'true';
-    if (isLoggedIn) {
-        window.location.href = 'checkout.php';
-    } else {
-        alert('Please log in to proceed to checkout.');
-        if (typeof openLoginModal === 'function') {
-            openLoginModal();
-        }
-    }
-}
+// (Removed old proceedToCheckout that navigated to checkout.php to follow the requirement
+//  that only the sidebar's Proceed to Checkout navigates to the shopping cart page.)
 
 
 // ===================================================================
@@ -194,7 +182,8 @@ function toggleCartSidebar(event) {
 function loadSidebarContents() {
     const listElement = document.getElementById('sidebarItemsList');
     const subtotalElement = document.getElementById('sidebarSubtotal');
-    const cartCountElement = document.querySelector('.cart-item-count');
+    const existingCartCountElement = document.querySelector('.cart-item-count');
+    let cartCountElement = existingCartCountElement;
 
     listElement.innerHTML = `
         <div class="sidebar-loading">
@@ -213,30 +202,37 @@ function loadSidebarContents() {
                 } else {
                     data.items.forEach(item => {
                         // Normalize image source
-                        let itemImageSrc = '/images/default_product.png';
+                        let itemImageSrc = 'images/default_product.png';
                         if (item.image_url) {
-                            const raw = item.image_url;
+                            const raw = String(item.image_url);
                             if (/^https?:\/\//i.test(raw)) {
                                 itemImageSrc = raw;
-                            } else if (raw.indexOf('uploads/') === 0 || raw.indexOf('/uploads/') === 0) {
-                                itemImageSrc = raw;
-                            } else if (raw.trim() !== '') {
-                                itemImageSrc = 'uploads/' + raw;
+                            } else {
+                                const normalized = raw.replace(/^\/+/, '');
+                                if (normalized.indexOf('uploads/') === 0) {
+                                    itemImageSrc = normalized;
+                                } else if (normalized.trim() !== '') {
+                                    itemImageSrc = 'uploads/' + normalized;
+                                }
                             }
                         }
 
                         const itemHTML = `
-                                <div class="sidebar-item" id="sidebar-item-${item.product_id}">
-                                    <img src="${itemImageSrc}" alt="${item.name}">
-                                    <div class="sidebar-item-details">
-                                        <h5>${item.name}</h5>
-                                        <p>${item.quantity} &times; $${parseFloat(item.price).toFixed(2)}</p>
-                                    </div>
-                                    <div class="sidebar-item-price">
-                                        $${(item.quantity * item.price).toFixed(2)}
-                                    </div>
-                                </div>
-                            `;
+                          <div class="sidebar-item" id="sidebar-item-${item.product_id}" data-product-id="${item.product_id}" data-price="${item.price}" data-quantity="${item.quantity}">
+                            <img src="${itemImageSrc}" alt="${item.name}">
+                            <div class="sidebar-item-details">
+                              <h5>${item.name}</h5>
+                              <div class="sidebar-qty-controls">
+                                <button class="qty-btn minus" data-action="dec" aria-label="Decrease quantity">−</button>
+                                <span class="qty-value" id="sidebar-qty-${item.product_id}">${item.quantity}</span>
+                                <button class="qty-btn plus" data-action="inc" aria-label="Increase quantity">+</button>
+                                <button class="remove-item" data-action="remove" aria-label="Remove item">×</button>
+                              </div>
+                            </div>
+                            <div class="sidebar-item-price" id="sidebar-line-total-${item.product_id}">
+                              $${(item.quantity * item.price).toFixed(2)}
+                            </div>
+                          </div>`;
                         listElement.insertAdjacentHTML('beforeend', itemHTML);
                     });
                 }
@@ -268,4 +264,112 @@ function loadSidebarContents() {
             console.error('Error loading sidebar:', error);
             listElement.innerHTML = '<p style="text-align:center; color: red;">Could not load cart.</p>';
         });
+}
+
+// Bind header cart icon to open the sidebar instead of navigating
+function bindHeaderCartIcon() {
+    const headerIcon = document.getElementById('headerCartIcon');
+    if (!headerIcon) {
+        console.warn('[CartSidebar] headerCartIcon not found in DOM yet.');
+        return false;
+    }
+    if (!headerIcon._cartBound) {
+        headerIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleCartSidebar(e);
+        });
+        headerIcon._cartBound = true;
+        console.log('[CartSidebar] Binding attached to headerCartIcon.');
+    } else {
+        console.log('[CartSidebar] Binding already present on headerCartIcon.');
+    }
+    return true;
+}
+
+function ensureCartSidebarBinding(maxAttempts = 5, attempt = 1) {
+    const bound = bindHeaderCartIcon();
+    if (!bound && attempt < maxAttempts) {
+        setTimeout(() => ensureCartSidebarBinding(maxAttempts, attempt + 1), 200 * attempt);
+    } else if (!bound) {
+        console.error('[CartSidebar] Failed to bind headerCartIcon after attempts:', maxAttempts);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => ensureCartSidebarBinding());
+} else {
+    ensureCartSidebarBinding();
+}
+
+// Extra safety: capture-phase delegated listener to intercept any clicks on the header cart icon
+// even if binding didn't attach for some reason.
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('#headerCartIcon');
+    if (target) {
+        e.preventDefault();
+        toggleCartSidebar(e);
+        return; // avoid processing as quantity controls
+    }
+    // Sidebar quantity controls
+    if (e.target && e.target.closest('.sidebar-qty-controls')) {
+        const btn = e.target;
+        const action = btn.getAttribute('data-action');
+        if (!action) return;
+        const itemRoot = btn.closest('.sidebar-item');
+        if (!itemRoot) return;
+        const productId = parseInt(itemRoot.getAttribute('data-product-id'), 10);
+        const qtySpan = itemRoot.querySelector('.qty-value');
+        let currentQty = parseInt(qtySpan.textContent, 10) || 1;
+        if (action === 'inc') {
+            currentQty += 1;
+            updateSidebarQuantity(productId, currentQty);
+        } else if (action === 'dec') {
+            if (currentQty > 1) {
+                currentQty -= 1;
+                updateSidebarQuantity(productId, currentQty);
+            } else {
+                // If at 1 and user decreases, optionally remove
+                removeSidebarItem(productId);
+            }
+        } else if (action === 'remove') {
+            removeSidebarItem(productId);
+        }
+    }
+}, true);
+
+// Ensure Proceed to Checkout directs to shopping cart page (not on header icon)
+function proceedToCheckout() {
+    const lang = document.documentElement.lang || 'en';
+    window.location.href = 'cart.php?lang=' + lang;
+}
+
+// Update quantity in backend then refresh sidebar
+function updateSidebarQuantity(productId, newQty) {
+    fetch('php/update_cart.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `product_id=${encodeURIComponent(productId)}&quantity=${encodeURIComponent(newQty)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            loadSidebarContents();
+        }
+    })
+    .catch(err => console.error('Update sidebar qty error:', err));
+}
+
+function removeSidebarItem(productId) {
+    fetch('php/remove_from_cart.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `product_id=${encodeURIComponent(productId)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            loadSidebarContents();
+        }
+    })
+    .catch(err => console.error('Remove sidebar item error:', err));
 }

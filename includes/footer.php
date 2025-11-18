@@ -23,7 +23,8 @@
             <span><?php echo $text['cart_subtotal'] ?? 'Subtotal'; ?></span>
             <span id="sidebarSubtotal">$0.00</span>
         </div>
-        <a href="cart.php?lang=<?php echo $lang; ?>" class="btn-view-cart"><?php echo $text['user_tabCart'] ?? 'View Cart'; ?></a>
+        <!-- Hide direct View Cart to ensure only Proceed to Checkout navigates -->
+        <!-- <a href="cart.php?lang=<?php echo $lang; ?>" class="btn-view-cart"><?php echo $text['user_tabCart'] ?? 'View Cart'; ?></a> -->
         <button class="btn-checkout-sidebar" onclick="proceedToCheckout()">
             <?php echo $text['cart_checkoutButton'] ?? 'Proceed to Checkout'; ?>
         </button>
@@ -143,5 +144,7 @@
 </div>
 
 <!-- SCRIPTS -->
+<?php $cartJsVer = @filemtime(__DIR__ . '/../js/cart_ajax.js') ?: time(); ?>
+<script src="js/cart_ajax.js?v=<?php echo $cartJsVer; ?>"></script>
 <script src="js/edits.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
